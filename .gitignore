@@ -2,6 +2,5 @@
 /node_modules
 /coverage
 
-# misc
-.DS_Store
 .env
+.DS_Store
