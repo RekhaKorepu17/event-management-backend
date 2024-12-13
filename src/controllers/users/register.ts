@@ -5,8 +5,8 @@ import {Request, Response} from "express"
 
  export const registerUser = async (req: Request, res: Response ) :Promise<any>=> {
     try {
-      const {username, password, email, mobile, isAdmin}= req.body;
-      const newUser: UserType = new UserClass(username, password, email, mobile, isAdmin)
+      const {username, password, email, mobile, role}= req.body;
+      const newUser: UserType = new UserClass(username, password, email, mobile, role)
       const existingUser:any = await User.findOne({ where: { username: username } });
       if(existingUser){
         return res.status(400).json({ message:"Username already exists"});
