@@ -1,0 +1,22 @@
+name: Build-and-test
+on:
+  push:
+    branches:
+      - feature/dbconnection-userauthentication
+
+jobs:
+  PetBuddy:
+    runs-on: macos-latest
+    steps:
+      - name: Check Git version
+        run: git --version
+
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+
+      - name: Install required dependencies
+        run: npm install
+
+      - name: Run tests
+        run: |
+          npm test
