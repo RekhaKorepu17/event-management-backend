@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../dbConnection";
+import { User } from "../types/User";
 
 const User= sequelize.define('User', {
     id: {
@@ -26,7 +27,12 @@ const User= sequelize.define('User', {
         }
     },
     mobile: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
+    },
+    role: {
+        type: DataTypes.ENUM('Admin', 'User'), 
+        allowNull: false,                     
+        defaultValue: 'User',               
     }
 })
 export default User;
