@@ -13,7 +13,7 @@ const main= async()=> {
 
       await sequelize.sync({alter: true});
   
-       app.use('/users', userRoutes);
+       app.use(userRoutes);
      
       const PORT = process.env.PORT || 3000;
       app.listen(PORT, () => {
