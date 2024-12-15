@@ -2,7 +2,7 @@ import { Event as eventType } from "../types/event";
 export class Event {
   name: string;
   description: string;
-  Date: Date;
+  eventDate: Date;
   startTime: Date;
   endTime: Date;
   address: string;
@@ -15,7 +15,7 @@ export class Event {
   constructor(event: eventType) {
     this.name = event.name;
     this.description = event.description;
-    this.Date = event.eventDate;
+    this.eventDate = event.eventDate;
     this.startTime = event.startTime;
     this.endTime = event.endTime;
     this.address = event.address;
