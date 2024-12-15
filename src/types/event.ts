@@ -1,8 +1,8 @@
-export type event = {
+export type Event = {
   id: number;
   name: string;
   description: string;
-  Date: Date;
+  eventDate: Date;
   startTime: Date;
   endTime: Date;
   address: string;
