@@ -20,8 +20,8 @@ export const registerUser = async (
     if (existingUser) {
       return res.status(400).send({ message: "Email is already registered" });
     }
-    await User.create(newUser);
-    return res.status(201).send({ message: "User account created" });
+    const user= await User.create(newUser);
+    return res.status(201).send({ message: "User account created", user: user });
   } catch (error: any) {
     console.error("Error during user registration:", error);
     return { message: "Failed to create a user", error: error.message };
