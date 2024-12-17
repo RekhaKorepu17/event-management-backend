@@ -15,9 +15,9 @@ export class Event {
   constructor(event: eventType) {
     this.name = event.name;
     this.description = event.description;
-    this.eventDate = event.eventDate;
-    this.startTime = event.startTime;
-    this.endTime = event.endTime;
+    this.eventDate = new Date(event.eventDate),
+    this.startTime = new Date(event.startTime),
+    this.endTime = new Date(event.endTime);
     this.address = event.address;
     this.eventType = event.eventType;
     this.eventStatus = event.eventStatus;
