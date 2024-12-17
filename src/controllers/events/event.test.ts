@@ -1,13 +1,13 @@
 import request from "supertest";
 import express, { Express } from "express";
-import { getAllEvents } from "./event";
+import { fetchEvents } from "./event";
 import Event from "../../models/event";
 
 jest.mock("../../models/event");
 
 const app: Express = express();
 app.use(express.json());
-app.get("/events", getAllEvents);
+app.get("/events", fetchEvents);
 
 describe("get route for events", () => {
   afterEach(() => {
