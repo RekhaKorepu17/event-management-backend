@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import Event from "../../models/event";
-export const getAllEvents= async(req: Request, res: Response): Promise<any> => {
+export const fetchEvents= async(req: Request, res: Response): Promise<any> => {
     try{
     const events = await Event.findAll(); 
      return res.status(200).json({ message: "Events retrieved succesfully" , events: events});
