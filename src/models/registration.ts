@@ -1,5 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../dbConnection";
+import User from "./user";
+import Event from "./event";
 
 const Registration = sequelize.define(
   "Registration",
@@ -13,7 +15,7 @@ const Registration = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Users",
+        model: User,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -22,7 +24,7 @@ const Registration = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Events",
+        model: Event,
         key: "id",
       },
       onDelete: "CASCADE",
