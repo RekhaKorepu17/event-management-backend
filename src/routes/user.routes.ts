@@ -5,7 +5,7 @@ import { validateUser } from "../controllers/users/user";
 
 userRoutes.post("/users",registerUser)
 
-userRoutes.get("/user", validateUser)
+userRoutes.post("/user", validateUser)
 
 
 
