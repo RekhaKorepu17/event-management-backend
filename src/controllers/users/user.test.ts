@@ -1,10 +1,17 @@
 import { validateUser } from "./user";
 import User from "../../models/user";
+import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 
-jest.mock("../../models/user");
+jest.mock("../../models/user", () => ({
+  findOne: jest.fn(),
+}));
 
-describe("validate User", () => {
+jest.mock("bcrypt", () => ({
+  compare: jest.fn(),
+}));
+
+describe("validateUser", () => {
   let requestMock: Partial<Request>;
   let responseMock: Partial<Response>;
   let jsonMock: jest.Mock;
@@ -12,77 +19,91 @@ describe("validate User", () => {
 
   beforeEach(() => {
     jsonMock = jest.fn();
-    statusMock = jest.fn(() => ({ json: jsonMock })) as any;
+    statusMock = jest.fn().mockReturnValue({ json: jsonMock });
 
     requestMock = {
-      query: {
-        username: "Rekha",
+      body: {
+        email: "rekha@gmail.com",
         password: "rekha@01",
       },
     };
 
     responseMock = {
       status: statusMock,
+      json: jsonMock,
     };
-  });
 
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should validate credentials when username and password are correct", async () => {
+  it("should validate credentials when email and password are correct", async () => {
     (User.findOne as jest.Mock).mockResolvedValue({
-      username: "Rekha",
-      password: "rekha@01",
+      email: "rekha@gmail.com",
+      password: "hashed_password",
     });
+
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
     await validateUser(requestMock as Request, responseMock as Response);
 
-    expect(User.findOne).toHaveBeenCalledWith({ where: { username: "Rekha" } });
+    expect(User.findOne).toHaveBeenCalledWith({
+      where: { email: "rekha@gmail.com" },
+    });
 
-    expect(statusMock).toHaveBeenCalledWith(201);
-    expect(jsonMock).toHaveBeenCalledWith({ message: "Valid credentials" });
+    expect(bcrypt.compare).toHaveBeenCalledWith(
+      "rekha@01",
+      "hashed_password"
+    );
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith({
+      message: "Valid credentials",
+      user: expect.any(Object),
+    });
   });
 
-  it("should return username not found when the user is not found", async () => {
+  it("should return 'email not found' when the user is not found", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(null);
 
     await validateUser(requestMock as Request, responseMock as Response);
 
-    expect(User.findOne).toHaveBeenCalledWith({ where: { username: "Rekha" } });
+    expect(User.findOne).toHaveBeenCalledWith({
+      where: { email: "rekha@gmail.com" },
+    });
 
     expect(statusMock).toHaveBeenCalledWith(404);
-    expect(jsonMock).toHaveBeenCalledWith({ message: "User not found" });
+    expect(jsonMock).toHaveBeenCalledWith({ message: "email not found" });
   });
 
-  it("should return an error when the password is incorrect", async () => {
+  it("should return 'Invalid password' when the password is incorrect", async () => {
     (User.findOne as jest.Mock).mockResolvedValue({
-      username: "testuser",
-      password: "WrongPassword@123",
+      email: "rekha@gmail.com",
+      password: "hashed_password",
     });
+
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     await validateUser(requestMock as Request, responseMock as Response);
 
-    expect(User.findOne).toHaveBeenCalledWith({ where: { username: "Rekha" } });
+    expect(User.findOne).toHaveBeenCalledWith({
+      where: { email: "rekha@gmail.com" },
+    });
 
-    expect(statusMock).toHaveBeenCalledWith(404);
+    expect(bcrypt.compare).toHaveBeenCalledWith(
+      "rekha@01",
+      "hashed_password"
+    );
+
+    expect(statusMock).toHaveBeenCalledWith(401);
     expect(jsonMock).toHaveBeenCalledWith({ message: "Invalid password" });
   });
 
   it("should handle errors gracefully", async () => {
     (User.findOne as jest.Mock).mockRejectedValue(new Error("Database error"));
 
-    const result = await validateUser(
-      requestMock as Request,
-      responseMock as Response
-    );
+    await validateUser(requestMock as Request, responseMock as Response);
 
-    expect(result).toEqual({
-      message: "Failed to fetch credentials",
-      error: "Database error",
-    });
-
-    expect(statusMock).not.toHaveBeenCalled();
+    expect(statusMock).not.toHaveBeenCalled(); 
     expect(jsonMock).not.toHaveBeenCalled();
   });
 });
