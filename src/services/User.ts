@@ -3,12 +3,12 @@ export class User {
     password: string;
     email: string;
     mobile: number;
-    isAdmin: boolean
-    constructor(username: string, password: string, email: string, mobile:number, isAdmin: boolean){
+    role: string
+    constructor(username: string, password: string, email: string, mobile:number, role: string){
        this.username= username;
        this.password= password;
        this.email= email;
        this.mobile= mobile;
-       this.isAdmin= isAdmin
+       this.role= role
     } 
 }

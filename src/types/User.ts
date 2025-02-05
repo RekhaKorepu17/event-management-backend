@@ -3,5 +3,5 @@ export type User={
     password: string,
     email: string,
     mobile: number,
-    isAdmin: boolean
+    role: string
 }
