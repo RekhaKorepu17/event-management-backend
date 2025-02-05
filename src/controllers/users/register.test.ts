@@ -1,9 +1,11 @@
 import { registerUser } from "./register";
 import User from "../../models/user";
-import { User as UserClass } from "../../services/User";
 import { Request, Response } from "express";
 
-jest.mock("../../models/user");
+jest.mock("../../models/user", () => ({
+  findOne: jest.fn(),
+  create: jest.fn(),
+}));
 
 describe("registerUser", () => {
   let requestMock: Partial<Request>;
@@ -13,7 +15,7 @@ describe("registerUser", () => {
 
   beforeEach(() => {
     jsonMock = jest.fn();
-    statusMock = jest.fn(() => ({ json: jsonMock })) as any;
+    statusMock = jest.fn().mockReturnValue({ json: jsonMock });
 
     requestMock = {
       body: {
@@ -21,64 +23,67 @@ describe("registerUser", () => {
         password: "rekha@01",
         email: "rekha@gmail.com",
         mobile: "1234567890",
-        isAdmin: "User",
+        role: "User",
       },
     };
 
     responseMock = {
       status: statusMock,
+      json: jsonMock,
     };
-  });
 
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should create a new user when username is unique", async () => {
+  it("should create a new user when email is unique", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(null);
-    (User.create as jest.Mock).mockResolvedValue({});
+    (User.create as jest.Mock).mockResolvedValue({ id: 1 });
 
     await registerUser(requestMock as Request, responseMock as Response);
-    expect(User.findOne).toHaveBeenCalledWith({ where: { username: "Rekha" } });
+
+    expect(User.findOne).toHaveBeenCalledTimes(1);
+    expect(User.findOne).toHaveBeenCalledWith({ where: { email: "rekha@gmail.com" } });
 
     expect(User.create).toHaveBeenCalledWith(
       expect.objectContaining({
         username: "Rekha",
-        password: "rekha@01",
+        password: expect.any(String),
         email: "rekha@gmail.com",
         mobile: "1234567890",
-        isAdmin: "User",
+        role: "User",
       })
     );
 
-    expect(statusMock).toHaveBeenCalledWith(400);
-    expect(jsonMock).toHaveBeenCalledWith({ message: "User account created" });
+    expect(statusMock).toHaveBeenCalledWith(201);
+    expect(jsonMock).toHaveBeenCalledWith({
+      message: "User account created",
+      user: { id: 1 },
+    });
   });
 
-  it("should return an error when username already exists", async () => {
-    (User.findOne as jest.Mock).mockResolvedValue({ username: "Rekha" });
+  it("should return an error when email already exists", async () => {
+    (User.findOne as jest.Mock).mockResolvedValue({ email: "rekha@gmail.com" });
 
     await registerUser(requestMock as Request, responseMock as Response);
-    expect(User.findOne).toHaveBeenCalledWith({ where: { username: "Rekha" } });
+
+    expect(User.findOne).toHaveBeenCalledTimes(1);
+    expect(User.findOne).toHaveBeenCalledWith({ where: { email: "rekha@gmail.com" } });
+
     expect(User.create).not.toHaveBeenCalled();
     expect(statusMock).toHaveBeenCalledWith(400);
-    expect(jsonMock).toHaveBeenCalledWith({
-      message: "Username already exists",
-    });
+    expect(jsonMock).toHaveBeenCalledWith({ message: "Email is already registered" });
   });
 
-  it("should throw error in case of any errors", async () => {
-    (User.findOne as jest.Mock).mockRejectedValue(
-      new Error("Failed to create user")
-    );
-    const result = await registerUser(
-      requestMock as Request,
-      responseMock as Response
-    );
-    expect(result).toEqual({
-      message: "Failed to create a user",
-      error: "Failed to create user",
-    });
+  it("should handle errors gracefully", async () => {
+    (User.findOne as jest.Mock).mockRejectedValue(new Error("Database error"));
+
+    await registerUser(requestMock as Request, responseMock as Response);
+
     expect(User.create).not.toHaveBeenCalled();
+    expect(statusMock).toHaveBeenCalledWith(500);
+    expect(jsonMock).toHaveBeenCalledWith({
+      message: "Failed to create a user",
+      error: "Database error",
+    });
   });
 });
