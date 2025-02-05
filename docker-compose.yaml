@@ -1,0 +1,29 @@
+version : "3"
+services:
+  container_name: event-backend
+  depends_on:
+     - db
+db: 
+  container_name: db
+  image: postgres:latest
+  restart: always
+  environment:
+      POSTGRES_PASSWORD: "1234"
+  ports:
+     - 5432:5432
+  network: 
+     - eventapp-network
+  health_check:
+      test: ["CMD-SHELL", "pg_isready -d postgres -U postgres"]
+      timout: 50s
+      retries: 10
+      interval: 10s
+  volume:
+    -app-data: /var/lib/postgresql/data
+
+  
+networks:
+  eventapp-network: {}
+volumes:
+  app-data: {}
+
