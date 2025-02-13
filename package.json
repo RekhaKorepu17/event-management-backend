@@ -12,7 +12,7 @@
   "description": "",
   "dependencies": {
     "@types/react": "^18.3.16",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
