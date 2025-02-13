@@ -1,29 +1,52 @@
-version : "3"
-services:
-  container_name: event-backend
-  depends_on:
-     - db
-db: 
-  container_name: db
-  image: postgres:latest
-  restart: always
-  environment:
-      POSTGRES_PASSWORD: "1234"
-  ports:
-     - 5432:5432
-  network: 
-     - eventapp-network
-  health_check:
-      test: ["CMD-SHELL", "pg_isready -d postgres -U postgres"]
-      timout: 50s
-      retries: 10
-      interval: 10s
-  volume:
-    -app-data: /var/lib/postgresql/data
+version: "3.8"
 
-  
+services:
+  event-backend:
+    build:
+      context: . 
+    container_name: event-backend
+    image: event-backend:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c", "sleep 10 && npm start"]
+    restart: always
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: rekha
+      PGPASSWORD: mypassword
+      PGDATABASE: eventmanagement
+    ports:
+      - "3001:3001"
+    networks:
+      - eventapp-network
+
+  db: 
+    container_name: db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: rekha
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: eventmanagement
+    ports:
+      - "5434:5432"  
+    networks: 
+      - eventapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d eventmanagement -U rekha || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
 networks:
-  eventapp-network: {}
+  eventapp-network:
+    name: eventapp-network
+
 volumes:
-  app-data: {}
+  postgres_data:
 
