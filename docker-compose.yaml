@@ -4,8 +4,8 @@ services:
   event-backend:
     build:
       context: . 
-    container_name: event-backend
-    image: event-backend:latest
+    container_name: eventbrite-app-backend
+    image: rekha1490/eventbrite-backend:latest
     depends_on:
       db:
         condition: service_healthy
@@ -18,7 +18,7 @@ services:
       PGPASSWORD: mypassword
       PGDATABASE: eventmanagement
     ports:
-      - "3001:3001"
+      - "5060:3001"
     networks:
       - eventapp-network
 
