@@ -12,7 +12,7 @@ services:
     entrypoint: ["/bin/sh", "-c", "sleep 10 && npm start"]
     restart: always
     environment:
-      PGHOST: db
+      PGHOST: event-server
       PGPORT: "5432"
       PGUSER: rekha
       PGPASSWORD: mypassword
