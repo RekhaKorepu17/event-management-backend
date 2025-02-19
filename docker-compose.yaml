@@ -7,7 +7,7 @@ services:
     container_name: eventbrite-app-backend
     image: rekha1490/eventbrite-backend:latest
     depends_on:
-      db:
+      event-server:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c", "sleep 10 && npm start"]
     restart: always
@@ -22,8 +22,8 @@ services:
     networks:
       - eventapp-network
 
-  db: 
-    container_name: db
+  event-server: 
+    container_name: event-server
     image: postgres:latest
     restart: always
     environment:
